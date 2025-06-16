@@ -1,119 +1,245 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { 
+  Box, 
+  Container,
+  createTheme,
+  ThemeProvider,
+  CssBaseline
+} from '@mui/material';
+import DashboardHeader from './components/DashboardHeader.jsx';
+import PortfolioMetrics from './components/PortfolioMetrics.jsx';
+import PerformanceCharts from './components/PerformanceCharts.jsx';
+import DiversificationAnalysis from './components/DiversificationAnalysis.jsx';
+import AssetsTable from './components/AssetsTable.jsx';
+import AlertsAnalysis from './components/AlertsAnalysis.jsx';
 import { usePortfolioData } from './hooks/usePortfolioData.js';
-import AssetCard from './components/AssetCard.jsx';
-import PortfolioSummary from './components/PortfolioSummary.jsx';
-import PerformanceChart from './components/PerformanceChart.jsx';
-import { Button } from '@/components/ui/button.jsx';
-import { Alert, AlertDescription } from '@/components/ui/alert.jsx';
-import { Loader2, RefreshCw, AlertCircle, TrendingUp } from 'lucide-react';
-import './App.css';
+
+// Tema personalizado
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+      light: '#42a5f5',
+      dark: '#1565c0',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+    success: {
+      main: '#2e7d32',
+      100: '#c8e6c9',
+    },
+    error: {
+      main: '#d32f2f',
+      100: '#ffcdd2',
+    },
+    warning: {
+      main: '#ed6c02',
+      100: '#ffe0b2',
+    },
+    info: {
+      main: '#0288d1',
+      100: '#b3e5fc',
+    },
+    background: {
+      default: '#f5f5f5',
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#212121',
+      secondary: '#757575',
+    },
+    divider: '#e0e0e0',
+    grey: {
+      50: '#fafafa',
+      100: '#f5f5f5',
+      200: '#eeeeee',
+      300: '#e0e0e0',
+      400: '#bdbdbd',
+      500: '#9e9e9e',
+      600: '#757575',
+      700: '#616161',
+      800: '#424242',
+      900: '#212121',
+    }
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 700,
+    },
+    h2: {
+      fontWeight: 700,
+    },
+    h3: {
+      fontWeight: 700,
+    },
+    h4: {
+      fontWeight: 600,
+    },
+    h5: {
+      fontWeight: 600,
+    },
+    h6: {
+      fontWeight: 600,
+    },
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          textTransform: 'none',
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 6,
+          fontWeight: 600,
+        },
+      },
+    },
+  },
+});
 
 function App() {
-  const { 
-    portfolioData, 
-    portfolioSummary, 
-    loading, 
-    error, 
-    lastUpdate, 
-    refetch 
-  } = usePortfolioData();
+  const [timeRange, setTimeRange] = useState('7D');
+  const { portfolioData, summary, loading, error, lastUpdated, refreshData } = usePortfolioData();
 
-  if (loading && Object.keys(portfolioData).length === 0) {
+  const handleTimeRangeChange = (newTimeRange) => {
+    setTimeRange(newTimeRange);
+  };
+
+  const handleRefresh = () => {
+    refreshData();
+  };
+
+  if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-          <p className="text-muted-foreground">Cargando datos del portafolio...</p>
-        </div>
-      </div>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box sx={{ 
+          width: '100vw', 
+          height: '100vh', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          bgcolor: 'background.default'
+        }}>
+          <Box sx={{ textAlign: 'center', p: 3 }}>
+            <h2>Error al cargar los datos</h2>
+            <p>{error}</p>
+            <button onClick={handleRefresh}>Reintentar</button>
+          </Box>
+        </Box>
+      </ThemeProvider>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <TrendingUp className="h-8 w-8 text-primary" />
-              <div>
-                <h1 className="text-2xl font-bold">Dashboard de Criptomonedas</h1>
-                <p className="text-sm text-muted-foreground">
-                  Monitor de portafolio en tiempo real
-                </p>
-              </div>
-            </div>
-            <Button 
-              onClick={refetch} 
-              variant="outline" 
-              size="sm"
-              disabled={loading}
-            >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
-              )}
-              Actualizar
-            </Button>
-          </div>
-        </div>
-      </header>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ 
+        width: '100vw',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.default',
+        boxSizing: 'border-box'
+      }}>
+        {/* Header Sticky */}
+        <DashboardHeader 
+          portfolioData={portfolioData}
+          summary={summary}
+          onRefresh={handleRefresh}
+          lastUpdated={lastUpdated}
+          timeRange={timeRange}
+          onTimeRangeChange={handleTimeRangeChange}
+        />
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Error al cargar los datos: {error}
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Contenido Principal */}
+        <Box sx={{ 
+          flex: 1,
+          width: '100%',
+          boxSizing: 'border-box'
+        }}>
+          {loading ? (
+            <Box sx={{ 
+              height: '60vh', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center' 
+            }}>
+              <Box sx={{ textAlign: 'center' }}>
+                <h2>Crypto Portfolio Dashboard</h2>
+                <p>Cargando datos del portafolio...</p>
+              </Box>
+            </Box>
+          ) : (
+            <>
+              {/* Sección 1: Métricas Principales */}
+              <PortfolioMetrics 
+                portfolioData={portfolioData} 
+                summary={summary}
+                timeRange={timeRange}
+              />
 
-        {/* Portfolio Summary */}
-        <PortfolioSummary summary={portfolioSummary} lastUpdate={lastUpdate} />
+              {/* Sección 2: Gráficos de Rendimiento */}
+              <PerformanceCharts 
+                portfolioData={portfolioData}
+                timeRange={timeRange}
+              />
 
-        {/* Performance Charts */}
-        <PerformanceChart portfolioData={portfolioData} />
+              {/* Sección 3: Análisis de Diversificación */}
+              <DiversificationAnalysis 
+                portfolioData={portfolioData}
+                summary={summary}
+              />
 
-        {/* Asset Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Object.entries(portfolioData).map(([symbol, asset]) => (
-            <AssetCard 
-              key={symbol} 
-              asset={asset} 
-              symbol={symbol.replace('USDT', '')} 
-            />
-          ))}
-        </div>
+              {/* Sección 4: Tabla Detallada de Activos */}
+              <AssetsTable 
+                portfolioData={portfolioData}
+              />
 
-        {/* Loading indicator for updates */}
-        {loading && Object.keys(portfolioData).length > 0 && (
-          <div className="fixed bottom-4 right-4">
-            <div className="bg-card border rounded-lg p-3 shadow-lg flex items-center space-x-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm">Actualizando...</span>
-            </div>
-          </div>
-        )}
-      </main>
+              {/* Sección 5: Alertas y Análisis */}
+              <AlertsAnalysis 
+                portfolioData={portfolioData}
+                summary={summary}
+              />
+            </>
+          )}
+        </Box>
 
-      {/* Footer */}
-      <footer className="border-t bg-card mt-12">
-        <div className="container mx-auto px-4 py-4">
-          <div className="text-center text-sm text-muted-foreground">
-            <p>Datos proporcionados por Binance API • Actualización automática cada 5 segundos</p>
-            {lastUpdate && (
-              <p className="mt-1">
-                Última actualización: {lastUpdate.toLocaleString()}
-              </p>
-            )}
-          </div>
-        </div>
-      </footer>
-    </div>
+        {/* Footer */}
+        <Box sx={{ 
+          width: '100%',
+          py: 3,
+          px: 3,
+          bgcolor: 'background.paper',
+          borderTop: `1px solid ${theme.palette.divider}`,
+          textAlign: 'center',
+          boxSizing: 'border-box'
+        }}>
+          <Box sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+            Datos proporcionados por Binance API • Actualización automática cada 5 segundos
+          </Box>
+          <Box sx={{ color: 'text.secondary', fontSize: '0.75rem', mt: 1 }}>
+            Última actualización: {lastUpdated}
+          </Box>
+        </Box>
+      </Box>
+    </ThemeProvider>
   );
 }
 

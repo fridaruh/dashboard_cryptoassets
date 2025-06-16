@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx';
+import { Card, CardContent, CardHeader } from '@/components/ui/card.jsx';
 import { Badge } from '@/components/ui/badge.jsx';
-import { TrendingUp, TrendingDown, DollarSign, Percent } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import { formatCurrency, formatPercentage } from '../utils/calculations.js';
 
 const AssetCard = ({ asset, symbol }) => {
@@ -12,97 +12,98 @@ const AssetCard = ({ asset, symbol }) => {
   const isWeeklyPositive = asset.weeklyReturn?.weeklyChangePercent >= 0;
 
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-300">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">{asset.name}</CardTitle>
-          <Badge variant={isProfitable ? "default" : "destructive"}>
-            {symbol}
-          </Badge>
+    <div className="apple-card apple-fade-in group">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className="apple-headline text-foreground">{asset.name}</h3>
+          <p className="apple-caption mt-1">{symbol}</p>
         </div>
-        <div className="text-2xl font-bold">
+        <div className={`apple-status-${isProfitable ? 'positive' : 'negative'}`}>
+          {isProfitable ? '+' : ''}{formatPercentage(asset.pnlPercentage, 1)}
+        </div>
+      </div>
+
+      {/* Current Price */}
+      <div className="mb-8">
+        <div className="apple-number-large text-foreground">
           {formatCurrency(asset.currentPrice, 4)}
         </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {/* Información de la inversión */}
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <p className="text-muted-foreground">Cantidad</p>
-            <p className="font-medium">{asset.quantity.toLocaleString()}</p>
+        <div className="flex items-center mt-2 space-x-4">
+          <div className={`flex items-center space-x-1 ${isDailyPositive ? 'text-green-600' : 'text-red-600'}`}>
+            {isDailyPositive ? (
+              <TrendingUp className="h-3 w-3" />
+            ) : (
+              <TrendingDown className="h-3 w-3" />
+            )}
+            <span className="text-sm font-medium">
+              {formatPercentage(asset.dailyReturn?.priceChangePercent || 0, 1)} 24h
+            </span>
           </div>
-          <div>
-            <p className="text-muted-foreground">Precio de compra</p>
-            <p className="font-medium">{formatCurrency(asset.purchasePrice, 4)}</p>
-          </div>
-        </div>
-
-        {/* Valor actual vs inversión */}
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <p className="text-muted-foreground">Valor actual</p>
-            <p className="font-medium">{formatCurrency(asset.currentValue)}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Inversión inicial</p>
-            <p className="font-medium">{formatCurrency(asset.purchaseValue)}</p>
-          </div>
-        </div>
-
-        {/* Ganancia/Pérdida total */}
-        <div className="border-t pt-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">P&L Total</span>
-            <div className="flex items-center space-x-1">
-              {isProfitable ? (
-                <TrendingUp className="h-4 w-4 text-green-500" />
-              ) : (
-                <TrendingDown className="h-4 w-4 text-red-500" />
-              )}
-              <span className={`font-semibold ${isProfitable ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(asset.pnl)}
-              </span>
-            </div>
-          </div>
-          <div className="text-right">
-            <span className={`text-sm font-medium ${isProfitable ? 'text-green-600' : 'text-red-600'}`}>
-              {formatPercentage(asset.pnlPercentage)}
+          <div className={`flex items-center space-x-1 ${isWeeklyPositive ? 'text-green-600' : 'text-red-600'}`}>
+            {isWeeklyPositive ? (
+              <TrendingUp className="h-3 w-3" />
+            ) : (
+              <TrendingDown className="h-3 w-3" />
+            )}
+            <span className="text-sm font-medium">
+              {formatPercentage(asset.weeklyReturn?.weeklyChangePercent || 0, 1)} 7d
             </span>
           </div>
         </div>
+      </div>
 
-        {/* Rendimientos */}
-        <div className="grid grid-cols-2 gap-4 text-sm border-t pt-3">
-          <div>
-            <p className="text-muted-foreground mb-1">24h</p>
-            <div className="flex items-center space-x-1">
-              {isDailyPositive ? (
-                <TrendingUp className="h-3 w-3 text-green-500" />
-              ) : (
-                <TrendingDown className="h-3 w-3 text-red-500" />
-              )}
-              <span className={`text-xs font-medium ${isDailyPositive ? 'text-green-600' : 'text-red-600'}`}>
-                {formatPercentage(asset.dailyReturn?.priceChangePercent || 0)}
-              </span>
+      {/* Holdings */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <span className="apple-caption">CANTIDAD</span>
+          <span className="apple-number text-foreground">{asset.quantity.toLocaleString()}</span>
+        </div>
+        
+        <div className="flex justify-between items-center">
+          <span className="apple-caption">PRECIO DE COMPRA</span>
+          <span className="apple-number text-muted-foreground">{formatCurrency(asset.purchasePrice, 4)}</span>
+        </div>
+        
+        <div className="h-px bg-border my-4"></div>
+        
+        <div className="flex justify-between items-center">
+          <span className="apple-caption">VALOR ACTUAL</span>
+          <span className="apple-number-medium text-foreground">{formatCurrency(asset.currentValue)}</span>
+        </div>
+        
+        <div className="flex justify-between items-center">
+          <span className="apple-caption">INVERSIÓN INICIAL</span>
+          <span className="apple-number text-muted-foreground">{formatCurrency(asset.purchaseValue)}</span>
+        </div>
+        
+        <div className="h-px bg-border my-4"></div>
+        
+        <div className="flex justify-between items-center">
+          <span className="apple-caption">GANANCIA/PÉRDIDA</span>
+          <div className="text-right">
+            <div className={`apple-number-medium ${isProfitable ? 'text-green-600' : 'text-red-600'}`}>
+              {formatCurrency(asset.pnl)}
             </div>
-          </div>
-          <div>
-            <p className="text-muted-foreground mb-1">7d</p>
-            <div className="flex items-center space-x-1">
-              {isWeeklyPositive ? (
-                <TrendingUp className="h-3 w-3 text-green-500" />
-              ) : (
-                <TrendingDown className="h-3 w-3 text-red-500" />
-              )}
-              <span className={`text-xs font-medium ${isWeeklyPositive ? 'text-green-600' : 'text-red-600'}`}>
-                {formatPercentage(asset.weeklyReturn?.weeklyChangePercent || 0)}
-              </span>
+            <div className={`text-sm ${isProfitable ? 'text-green-600' : 'text-red-600'}`}>
+              {formatPercentage(asset.pnlPercentage)}
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="mt-6">
+        <div className="apple-progress">
+          <div 
+            className={`apple-progress-fill ${isProfitable ? 'bg-green-500' : 'bg-red-500'}`}
+            style={{ 
+              width: `${Math.min(Math.abs(asset.pnlPercentage), 100)}%` 
+            }}
+          ></div>
+        </div>
+      </div>
+    </div>
   );
 };
 
